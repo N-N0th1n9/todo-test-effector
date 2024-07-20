@@ -1,19 +1,31 @@
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { useUnit } from 'effector-react'
+import { FormEvent, useState } from 'react'
 import TodosContainer from '../entities/todos-container'
-import { $todos } from '../entities/todos-container/ui/todo/model'
+import { $todos, addTodo } from '../entities/todos-container/ui/todo/model'
 
 function Home() {
-	const todos = useUnit($todos)
+	const [todos, createTodo] = useUnit([$todos, addTodo])
+	const [text, setText] = useState('')
+
+	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		if (text.trim()) {
+			createTodo(text)
+			setText('')
+		}
+	}
 
 	return (
 		<div>
-			<div className='flex gap-2 my-7'>
+			<form className='flex gap-2 my-7' onSubmit={handleSubmit}>
 				<TextField
 					fullWidth
 					label='Create'
 					className='basis-4/5'
+					value={text}
+					onChange={e => setText(e.target.value)}
 					sx={{
 						borderRadius: 1,
 						color: '#ffffffde',
@@ -36,22 +48,22 @@ function Home() {
 						},
 					}}
 				/>
-				<Button variant='contained' className='basis-1/5'>
+				<Button variant='contained' className='basis-1/5' type='submit'>
 					Add todo
 				</Button>
-			</div>
+			</form>
 			<div className='flex gap-7'>
 				<TodosContainer
 					todos={todos.filter(todo => todo.type === 'today')}
-					title='Today'
+					type='today'
 				/>
 				<TodosContainer
 					todos={todos.filter(todo => todo.type === 'tomorrow')}
-					title='Tomorrow'
+					type='tomorrow'
 				/>
 				<TodosContainer
 					todos={todos.filter(todo => todo.type === 'other')}
-					title='7 days'
+					type='other'
 				/>
 			</div>
 		</div>
